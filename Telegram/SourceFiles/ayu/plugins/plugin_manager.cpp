@@ -94,7 +94,7 @@ QVector<PluginEntry> Scan(const QString &rootPath) {
 	while (iterator.hasNext()) {
 		const auto path = iterator.next();
 		const auto info = QFileInfo(path);
-		if (info.size() <= 0 || info.size() > kMaximumMetadataFileSize) {
+		if (info.size() <= 0 || info.size() > kMaximumPluginFileSize) {
 			continue;
 		}
 
@@ -102,7 +102,8 @@ QVector<PluginEntry> Scan(const QString &rootPath) {
 		if (!file.open(QIODevice::ReadOnly)) {
 			continue;
 		}
-		const auto metadata = Ui::ParsePluginMetadata(file.readAll());
+		const auto metadata = Ui::ParsePluginMetadata(
+			file.read(kMaximumMetadataFileSize));
 		if (metadata.id.isEmpty() || seenIds.contains(metadata.id)) {
 			continue;
 		}
