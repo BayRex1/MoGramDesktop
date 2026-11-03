@@ -2,6 +2,8 @@
 // This code is part of the AyuGram Desktop-derived Mogram project.
 #include "ayu/plugins/plugin_manager.h"
 
+#include <algorithm>
+
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
