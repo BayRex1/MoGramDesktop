@@ -416,15 +416,6 @@ void FillPluginInfoBox(
 
 	Ui::AddSkip(box->verticalLayout());
 
-	box->verticalLayout()->add(
-		object_ptr<Ui::FlatLabel>(
-			box->verticalLayout(),
-			tr::ayu_PluginsNotAvailable(),
-			st::boxDividerLabel),
-		st::boxRowPadding);
-
-	Ui::AddSkip(box->verticalLayout());
-
 	box->addButton(u"Установить"_q, [=] {
 		switch (Mogram::Plugins::Install(pluginPath, metadata)) {
 		case Mogram::Plugins::InstallResult::Installed:
