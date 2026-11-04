@@ -27,7 +27,7 @@
 +    result=$?
 +    if [ "$result" -ne 0 ]; then
 +        echo "FFmpeg preparation failed with exit code $result"
-+        for log in config.log ffmpeg/config.log; do
++        for log in config.log ffmpeg/config.log ffbuild/config.log; do
 +            if [ -f "$log" ]; then
 +                echo "===== $log (last 250 lines) ====="
 +                tail -n 250 "$log"
