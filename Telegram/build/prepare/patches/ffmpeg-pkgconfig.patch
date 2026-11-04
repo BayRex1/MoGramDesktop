@@ -1,6 +1,6 @@
 --- a/build_ffmpeg_win.sh
 +++ b/build_ffmpeg_win.sh
-@@ -8,1 +8,35 @@
+@@ -8,2 +8,35 @@
 -export PKG_CONFIG_PATH="$FullExecPath/../local/lib/pkgconfig:$PKG_CONFIG_PATH"
 +DAV1D_PKG_CONFIG_DIR="$(cygpath -u "$FullScriptPath/../local/lib/pkgconfig")"
 +export PKG_CONFIG_PATH="$DAV1D_PKG_CONFIG_DIR"
