@@ -1208,13 +1208,13 @@ depends:patches/ffmpeg.patch
     SET PATH=%THIRDPARTY_DIR%\\msys64\\usr\\bin;%PATH%
     SET CHERE_INVOKING=enabled_from_arguments
     SET MSYS2_PATH_TYPE=inherit
-    SET "PKG_CONFIG_PATH=%LIBS_DIR%\\local\\lib\\pkgconfig"
 
     SET "ARCH_PARAM="
 winarm:
     SET "ARCH_PARAM=--arch=aarch64"
 win:
 depends:patches/build_ffmpeg_win.sh
+    git -C ../patches apply "%ROOT_DIR%\\Telegram\\build\\prepare\\patches\\ffmpeg-pkgconfig.patch"
     bash ../patches/build_ffmpeg_win.sh
 mac:
     export PKG_CONFIG_PATH=$USED_PREFIX/lib/pkgconfig
