@@ -1215,7 +1215,7 @@ winarm:
     SET "ARCH_PARAM=--arch=aarch64"
 win:
 depends:patches/build_ffmpeg_win.sh
-    bash --login -c 'export PKG_CONFIG_PATH="$(cygpath -u "$PKG_CONFIG_PATH")"; bash ../patches/build_ffmpeg_win.sh'
+    bash ../patches/build_ffmpeg_win.sh
 mac:
     export PKG_CONFIG_PATH=$USED_PREFIX/lib/pkgconfig
 
