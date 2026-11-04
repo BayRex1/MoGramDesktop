@@ -1,13 +1,39 @@
 --- a/build_ffmpeg_win.sh
 +++ b/build_ffmpeg_win.sh
-@@ -8,2 +8,9 @@
+@@ -8,2 +8,29 @@
 -export PKG_CONFIG_PATH="$FullExecPath/../local/lib/pkgconfig:$PKG_CONFIG_PATH"
 +DAV1D_PKG_CONFIG_DIR="$(cygpath -u "$FullScriptPath/../local/lib/pkgconfig")"
 +export PKG_CONFIG_PATH="$DAV1D_PKG_CONFIG_DIR"
-+echo "FFmpeg pkg-config directory: $PKG_CONFIG_PATH"
-+if [ ! -f "$PKG_CONFIG_PATH/dav1d.pc" ]; then
-+    echo "dav1d.pc is missing from the expected pkg-config directory"
-+    exit 1
++echo "FFmpeg pkg-config diagnostic:"
++echo "  PATH pkg-config: $(command -v pkg-config)"
++echo "  pkg-config version: $(pkg-config --version)"
++echo "  PKG_CONFIG_PATH: $PKG_CONFIG_PATH"
++echo "  dav1d.pc directory: $(pkg-config --variable=pcfiledir dav1d 2>&1)"
++echo "  dav1d version: $(pkg-config --modversion dav1d 2>&1)"
++echo "  dav1d cflags: $(pkg-config --cflags dav1d 2>&1)"
++echo "  dav1d libs: $(pkg-config --libs dav1d 2>&1)"
++pkg-config --exists --print-errors "dav1d >= 0.5.0"
++DAV1D_EXISTS_STATUS=$?
++echo "  exact FFmpeg version predicate exit code: $DAV1D_EXISTS_STATUS"
++pkg-config --debug --exists "dav1d >= 0.5.0" > dav1d-pkg-config-debug.log 2>&1
++DAV1D_DEBUG_STATUS=$?
++echo "  pkg-config debug predicate exit code: $DAV1D_DEBUG_STATUS"
++cat dav1d-pkg-config-debug.log
++if [ "$DAV1D_EXISTS_STATUS" -ne 0 ]; then
++    echo "pkg-config rejected the dav1d version predicate; stopping before FFmpeg configure."
++    exit "$DAV1D_EXISTS_STATUS"
 +fi
-+pkg-config --modversion dav1d
++ffmpeg_config_diagnostics() {
++    result=$?
++    if [ "$result" -ne 0 ]; then
++        echo "FFmpeg preparation failed with exit code $result"
++        for log in config.log ffmpeg/config.log; do
++            if [ -f "$log" ]; then
++                echo "===== $log (last 250 lines) ====="
++                tail -n 250 "$log"
++            fi
++        done
++    fi
++}
++trap ffmpeg_config_diagnostics EXIT
  export PATH="$FullExecPath/../gas-preprocessor:$PATH"
