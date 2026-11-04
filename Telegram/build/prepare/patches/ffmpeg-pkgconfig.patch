@@ -1,0 +1,13 @@
+--- a/build_ffmpeg_win.sh
++++ b/build_ffmpeg_win.sh
+@@ -8,7 +8,12 @@
+-export PKG_CONFIG_PATH="$FullExecPath/../local/lib/pkgconfig:$PKG_CONFIG_PATH"
++DAV1D_PKG_CONFIG_DIR="$(cygpath -u "$FullScriptPath/../local/lib/pkgconfig")"
++export PKG_CONFIG_PATH="$DAV1D_PKG_CONFIG_DIR"
++echo "FFmpeg pkg-config directory: $PKG_CONFIG_PATH"
++if [ ! -f "$PKG_CONFIG_PATH/dav1d.pc" ]; then
++    echo "dav1d.pc is missing from the expected pkg-config directory"
++    exit 1
++fi
++pkg-config --modversion dav1d
+ export PATH="$FullExecPath/../gas-preprocessor:$PATH"
