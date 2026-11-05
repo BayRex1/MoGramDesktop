@@ -416,7 +416,7 @@ void FillPluginInfoBox(
 
 	Ui::AddSkip(box->verticalLayout());
 
-	box->addButton(u"Установить"_q, [=] {
+	box->addButton(rpl::single(u"Установить"_q), [=] {
 		switch (Mogram::Plugins::Install(pluginPath, metadata)) {
 		case Mogram::Plugins::InstallResult::Installed:
 			controller->showToast(u"Плагин успешно установлен"_q, 2500);
