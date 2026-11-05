@@ -1213,8 +1213,7 @@ depends:patches/ffmpeg.patch
 winarm:
     SET "ARCH_PARAM=--arch=aarch64"
 win:
-depends:patches/build_ffmpeg_win.sh
-    git -C ../patches apply "%ROOT_DIR%\\MoGramDesktop\\Telegram\\build\\prepare\\patches\\ffmpeg-pkgconfig.patch"
+    python "%ROOT_DIR%\\MoGramDesktop\\Telegram\\build\\prepare\\patches\\patch_ffmpeg.py" ../patches/build_ffmpeg_win.sh
     bash ../patches/build_ffmpeg_win.sh
 mac:
     export PKG_CONFIG_PATH=$USED_PREFIX/lib/pkgconfig
