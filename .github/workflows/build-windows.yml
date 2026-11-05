@@ -202,9 +202,25 @@ jobs:
         if: (env.UPLOAD_ARTIFACT == 'true') || (github.ref == 'refs/heads/nightly')
         run: |
           set OUT=%TBUILD%\%REPO_NAME%\out\Debug
-          mkdir artifact
-          move %OUT%\Telegram.exe artifact/
-          move %OUT%\Updater.exe artifact/
+          if not exist "%OUT%\AyuGram.exe" if not exist "%OUT%\Telegram.exe" (
+            echo ERROR: Main client executable was not produced.
+            dir "%OUT%"
+            exit /b 1
+          )
+          if exist "%OUT%\AyuGram.exe" (
+            move "%OUT%\AyuGram.exe" artifact\MoGram.exe
+          ) else (
+            move "%OUT%\Telegram.exe" artifact\MoGram.exe
+          )
+          if errorlevel 1 exit /b 1
+          if not exist "%OUT%\Updater.exe" (
+            echo ERROR: Updater.exe was not produced.
+            dir "%OUT%"
+            exit /b 1
+          )
+          move "%OUT%\Updater.exe" artifact\
+          if errorlevel 1 exit /b 1
+          dir artifact
       - uses: actions/upload-artifact@v7
         name: Upload artifact.
         if: (env.UPLOAD_ARTIFACT == 'true') || (github.ref == 'refs/heads/nightly')
