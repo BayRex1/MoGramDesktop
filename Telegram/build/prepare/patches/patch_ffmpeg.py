@@ -5,8 +5,12 @@ import sys
 target = pathlib.Path(sys.argv[1])
 source = target.read_text(encoding="utf-8")
 pattern = re.compile(r"(?m)^export PKG_CONFIG_PATH=.*$")
-replacement = r'''DAV1D_PKG_CONFIG_DIR="$(cygpath -u "$FullScriptPath/../local/lib/pkgconfig")"
-export PKG_CONFIG_PATH="$DAV1D_PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
+replacement = r'''DAV1D_PKG_CONFIG_DIR="$(cygpath -w "$FullScriptPath/../local/lib/pkgconfig")"
+if [ -n "$PKG_CONFIG_PATH" ]; then
+    export PKG_CONFIG_PATH="$DAV1D_PKG_CONFIG_DIR;$PKG_CONFIG_PATH"
+else
+    export PKG_CONFIG_PATH="$DAV1D_PKG_CONFIG_DIR"
+fi
 
 # Strawberry pkg-config 0.26 may receive FFmpeg version predicates as
 # separate shell arguments. Join the module, operator and version first.
