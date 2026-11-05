@@ -1853,6 +1853,7 @@ stage('tde2e', """
     cd tde2e
     git checkout 51743df
 win:
+    SET PATH=%THIRDPARTY_DIR%\\msys64\\ucrt64\\bin;%THIRDPARTY_DIR%\\msys64\\usr\\bin;%PATH%
     SET OPENSSL_DIR=%LIBS_DIR%\\openssl3
     SET OPENSSL_LIBS_DIR=%OPENSSL_DIR%\\out
     SET ZLIB_LIBS_DIR=%LIBS_DIR%\\zlib
