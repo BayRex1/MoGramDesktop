@@ -1,6 +1,6 @@
 --- a/build_ffmpeg_win.sh
 +++ b/build_ffmpeg_win.sh
-@@ -8,2 +8,35 @@
+@@ -8,1 +8,69 @@
 -export PKG_CONFIG_PATH="$FullExecPath/../local/lib/pkgconfig:$PKG_CONFIG_PATH"
 +DAV1D_PKG_CONFIG_DIR="$(cygpath -u "$FullScriptPath/../local/lib/pkgconfig")"
 +export PKG_CONFIG_PATH="$DAV1D_PKG_CONFIG_DIR"
@@ -36,4 +36,38 @@
 +    fi
 +}
 +trap ffmpeg_config_diagnostics EXIT
- export PATH="$FullExecPath/../gas-preprocessor:$PATH"
++# FFmpeg 6.1 passes version constraints as separate shell words. Strawberry
++# pkg-config 0.26 treats ">=" as a package name; normalize the arguments.
++REAL_PKG_CONFIG="$(command -v pkg-config)"
++PKG_CONFIG_WRAPPER_DIR="$(mktemp -d)"
++cat > "$PKG_CONFIG_WRAPPER_DIR/pkg-config" <<EOF
++#!/usr/bin/env bash
++real_pkg_config="$REAL_PKG_CONFIG"
++args=()
++while (($#)); do
++    case "$1" in
++        ">="|"<="|">"|"<"|"=")
++            if ((${#args[@]})) && (($# >= 2)); then
++                last=$((${#args[@]} - 1))
++                module="${args[$last]} $1 $2"
++                unset 'args[last]'
++                args+=("$module")
++                shift 2
++            else
++                args+=("$1")
++                shift
++            fi
++            ;;
++        *)
++            args+=("$1")
++            shift
++            ;;
++    esac
++done
++exec "$real_pkg_config" "${args[@]}"
++EOF
++chmod +x "$PKG_CONFIG_WRAPPER_DIR/pkg-config"
++export PATH="$PKG_CONFIG_WRAPPER_DIR:$PATH"
++echo "pkg-config compatibility wrapper: $REAL_PKG_CONFIG"
++pkg-config --exists --print-errors dav1d ">=" 0.5.0
++echo "split-argument dav1d predicate exit code: $?" export PATH="$FullExecPath/../gas-preprocessor:$PATH"
