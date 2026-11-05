@@ -8,6 +8,7 @@
 
 #include "apiwrap.h"
 #include "ayu/ayu_url_handlers.h"
+#include "ayu/plugins/plugin_manager.h"
 #include "core/file_utilities.h"
 #include "core/ui_integration.h"
 #include "data/data_document.h"
@@ -415,28 +416,27 @@ void FillPluginInfoBox(
 
 	Ui::AddSkip(box->verticalLayout());
 
-	box->verticalLayout()->add(
-		object_ptr<Ui::FlatLabel>(
-			box->verticalLayout(),
-			tr::ayu_PluginsNotAvailable(),
-			st::boxDividerLabel),
-		st::boxRowPadding);
+	box->addButton(rpl::single(u"Установить"_q), [=] {
+		switch (Mogram::Plugins::Install(pluginPath, metadata)) {
+		case Mogram::Plugins::InstallResult::Installed:
+			controller->showToast(u"Плагин успешно установлен"_q, 2500);
+			box->closeBox();
+			break;
+		case Mogram::Plugins::InstallResult::AlreadyInstalled:
+			controller->showToast(u"Этот плагин уже установлен"_q, 2500);
+			break;
+		case Mogram::Plugins::InstallResult::InvalidPlugin:
+			controller->showToast(u"Файл плагина недействителен"_q, 2500);
+			break;
+		case Mogram::Plugins::InstallResult::IoError:
+			controller->showToast(u"Не удалось установить плагин"_q, 2500);
+			break;
+		}
+	});
 
-	Ui::AddSkip(box->verticalLayout());
-
-	const auto closeButton = box->addButton(
+	box->addButton(
 		tr::lng_close(),
 		[=] { box->closeBox(); });
-	const auto buttonWidth = box->width()
-		- rect::m::sum::h(st::starrefFooterBox.buttonPadding);
-	closeButton->widthValue() | rpl::filter([=]
-	{
-		return (closeButton->widthNoMargins() != buttonWidth);
-	}) | rpl::on_next([=]
-					  {
-						  closeButton->resizeToWidth(buttonWidth);
-					  },
-					  closeButton->lifetime());
 }
 
 }

@@ -471,18 +471,18 @@ win:
     SET CHERE_INVOKING=enabled_from_arguments
     SET MSYS2_PATH_TYPE=inherit
 
-    powershell -Command "iwr -OutFile ./msys64.exe https://github.com/msys2/msys2-installer/releases/download/2025-08-30/msys2-base-x86_64-20250830.sfx.exe"
+    powershell -Command "iwr -OutFile ./msys64.exe https://github.com/msys2/msys2-installer/releases/download/2026-09-27/msys2-base-x86_64-20260927.sfx.exe"
     msys64.exe
     del msys64.exe
 
     bash -c "pacman-key --init; pacman-key --populate; pacman -Syu --noconfirm"
     pacman -Syu --noconfirm ^
         make ^
-        mingw-w64-x86_64-diffutils ^
-        mingw-w64-x86_64-gperf ^
-        mingw-w64-x86_64-nasm ^
-        mingw-w64-x86_64-perl ^
-        mingw-w64-x86_64-pkgconf
+        mingw-w64-ucrt-x86_64-diffutils ^
+        mingw-w64-ucrt-x86_64-gperf ^
+        mingw-w64-ucrt-x86_64-nasm ^
+        mingw-w64-ucrt-x86_64-perl ^
+        mingw-w64-ucrt-x86_64-pkgconf
 """, 'ThirdParty')
 
 stage('python', """
@@ -768,6 +768,7 @@ win:
 
 # Somehow in x86 Debug build dav1d crashes on AV1 10bpc videos.
 stage('dav1d', """
+version: mogram-pkgconfig-refresh-1
     git clone -b 1.5.4 https://code.videolan.org/videolan/dav1d.git
     cd dav1d
 win32:
@@ -1213,8 +1214,8 @@ depends:patches/ffmpeg.patch
 winarm:
     SET "ARCH_PARAM=--arch=aarch64"
 win:
-depends:patches/build_ffmpeg_win.sh
-    bash --login ../patches/build_ffmpeg_win.sh
+    python "%ROOT_DIR%\\MoGramDesktop\\Telegram\\build\\prepare\\patches\\patch_ffmpeg.py" ../patches/build_ffmpeg_win.sh
+    bash ../patches/build_ffmpeg_win.sh
 mac:
     export PKG_CONFIG_PATH=$USED_PREFIX/lib/pkgconfig
 
@@ -1852,6 +1853,7 @@ stage('tde2e', """
     cd tde2e
     git checkout 51743df
 win:
+    SET PATH=%THIRDPARTY_DIR%\\msys64\\ucrt64\\bin;%THIRDPARTY_DIR%\\msys64\\usr\\bin;%PATH%
     SET OPENSSL_DIR=%LIBS_DIR%\\openssl3
     SET OPENSSL_LIBS_DIR=%OPENSSL_DIR%\\out
     SET ZLIB_LIBS_DIR=%LIBS_DIR%\\zlib

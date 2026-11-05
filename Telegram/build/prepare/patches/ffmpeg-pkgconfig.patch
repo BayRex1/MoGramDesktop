@@ -1,0 +1,74 @@
+--- a/build_ffmpeg_win.sh
++++ b/build_ffmpeg_win.sh
+@@ -11,2 +11,70 @@
+-export PKG_CONFIG_PATH="$FullExecPath/../local/lib/pkgconfig:$PKG_CONFIG_PATH"
++DAV1D_PKG_CONFIG_DIR="$(cygpath -u "$FullScriptPath/../local/lib/pkgconfig")"
++export PKG_CONFIG_PATH="$DAV1D_PKG_CONFIG_DIR"
++echo "FFmpeg pkg-config diagnostic:"
++echo "  PATH pkg-config: $(command -v pkg-config)"
++echo "  pkg-config version: $(pkg-config --version)"
++echo "  PKG_CONFIG_PATH: $PKG_CONFIG_PATH"
++echo "  dav1d.pc directory: $(pkg-config --variable=pcfiledir dav1d 2>&1)"
++echo "  dav1d version: $(pkg-config --modversion dav1d 2>&1)"
++echo "  dav1d cflags: $(pkg-config --cflags dav1d 2>&1)"
++echo "  dav1d libs: $(pkg-config --libs dav1d 2>&1)"
++pkg-config --exists --print-errors "dav1d >= 0.5.0"
++DAV1D_EXISTS_STATUS=$?
++echo "  exact FFmpeg version predicate exit code: $DAV1D_EXISTS_STATUS"
++pkg-config --debug --exists "dav1d >= 0.5.0" > dav1d-pkg-config-debug.log 2>&1
++DAV1D_DEBUG_STATUS=$?
++echo "  pkg-config debug predicate exit code: $DAV1D_DEBUG_STATUS"
++cat dav1d-pkg-config-debug.log
++if [ "$DAV1D_EXISTS_STATUS" -ne 0 ]; then
++    echo "pkg-config rejected the dav1d version predicate; stopping before FFmpeg configure."
++    exit "$DAV1D_EXISTS_STATUS"
++fi
++ffmpeg_config_diagnostics() {
++    result=$?
++    if [ "$result" -ne 0 ]; then
++        echo "FFmpeg preparation failed with exit code $result"
++        for log in config.log ffmpeg/config.log ffbuild/config.log; do
++            if [ -f "$log" ]; then
++                echo "===== $log (last 250 lines) ====="
++                tail -n 250 "$log"
++            fi
++        done
++    fi
++}
++trap ffmpeg_config_diagnostics EXIT
++# FFmpeg 6.1 passes version constraints as separate shell words. Strawberry
++# pkg-config 0.26 treats ">=" as a package name; normalize the arguments.
++REAL_PKG_CONFIG="$(command -v pkg-config)"
++export REAL_PKG_CONFIG
++PKG_CONFIG_WRAPPER_DIR="$(mktemp -d)"
++cat > "$PKG_CONFIG_WRAPPER_DIR/pkg-config" <<'EOF'
++#!/usr/bin/env bash
++args=()
++while (($#)); do
++    case "$1" in
++        ">="|"<="|">"|"<"|"=")
++            if ((${#args[@]})) && (($# >= 2)); then
++                last=$((${#args[@]} - 1))
++                module="${args[$last]} $1 $2"
++                unset 'args[last]'
++                args+=("$module")
++                shift 2
++            else
++                args+=("$1")
++                shift
++            fi
++            ;;
++        *)
++            args+=("$1")
++            shift
++            ;;
++    esac
++done
++exec "$REAL_PKG_CONFIG" "${args[@]}"
++EOF
++chmod +x "$PKG_CONFIG_WRAPPER_DIR/pkg-config"
++export PATH="$PKG_CONFIG_WRAPPER_DIR:$PATH"
++echo "pkg-config compatibility wrapper: $REAL_PKG_CONFIG"
++pkg-config --exists --print-errors dav1d ">=" 0.5.0
++echo "split-argument dav1d predicate exit code: $?"
+ export PATH="$FullExecPath/../gas-preprocessor:$PATH"
